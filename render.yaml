@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: cinematch
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app_flask:app
+    envVars:
+      - key: TMDB_API_KEY
+        sync: false
+      - key: MOVIE_DICT_URL
+        sync: false
+      - key: SIMILARITY_URL
+        sync: false
