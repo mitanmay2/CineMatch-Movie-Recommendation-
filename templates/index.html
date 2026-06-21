@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CineMatch - Movie Recommendations</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            color: #ffffff;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        nav {
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: 1px;
+        }
+
+        .nav-subtitle {
+            font-size: 0.7rem;
+            color: #aaa;
+            margin-top: -0.5rem;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            margin-bottom: 3rem;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header p {
+            color: #aaa;
+            font-size: 1rem;
+        }
+
+        .search-section {
+            margin-bottom: 3rem;
+        }
+
+        .search-wrapper {
+            display: flex;
+            gap: 1rem;
+            align-items: stretch;
+            flex-wrap: wrap;
+        }
+
+        .select-wrapper {
+            flex: 1;
+            min-width: 250px;
+            position: relative;
+        }
+
+        select {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(102, 126, 234, 0.3);
+            color: #fff;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            appearance: none;
+            padding-right: 2.5rem;
+        }
+
+        select:hover {
+            border-color: rgba(102, 126, 234, 0.7);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 15px rgba(102, 126, 234, 0.3);
+        }
+
+        select option {
+            background: #1a1a2e;
+            color: #fff;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        button {
+            padding: 0.8rem 2rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            color: #fff;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .btn-clear {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-clear:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .selected-movie-section {
+            margin-bottom: 3rem;
+            padding: 2rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            border: 1px solid rgba(102, 126, 234, 0.2);
+            backdrop-filter: blur(10px);
+        }
+
+        .selected-movie-content {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .movie-poster-container {
+            position: relative;
+            overflow: hidden;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .movie-poster {
+            width: 200px;
+            height: 300px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .movie-info h2 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .movie-info p {
+            color: #ccc;
+            margin-bottom: 0.5rem;
+            line-height: 1.6;
+        }
+
+        .no-poster {
+            width: 200px;
+            height: 300px;
+            background: rgba(102, 126, 234, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            border: 2px dashed rgba(102, 126, 234, 0.3);
+            color: #667eea;
+            text-align: center;
+            padding: 1rem;
+        }
+
+        .recommendations-section {
+            margin-top: 3rem;
+        }
+
+        .section-title {
+            font-size: 1.8rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .section-title::before {
+            content: '';
+            width: 4px;
+            height: 2rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 2px;
+        }
+
+        .recommendations-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 1.5rem;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .movie-card {
+            position: relative;
+            overflow: hidden;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            aspect-ratio: 2/3;
+        }
+
+        .movie-card:hover {
+            transform: translateY(-8px) scale(1.05);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        .movie-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .movie-card:hover img {
+            transform: scale(1.1);
+        }
+
+        .movie-card-title {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(transparent, rgba(0, 0, 0, 0.9));
+            padding: 2rem 1rem 1rem;
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-align: center;
+            transform: translateY(100%);
+            transition: transform 0.3s ease;
+        }
+
+        .movie-card:hover .movie-card-title {
+            transform: translateY(0);
+        }
+
+        .movie-placeholder {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px dashed rgba(102, 126, 234, 0.3);
+            color: #667eea;
+            font-size: 1rem;
+            text-align: center;
+            padding: 1rem;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 2rem;
+            color: #aaa;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .spinner {
+            border: 3px solid rgba(102, 126, 234, 0.2);
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error-message {
+            background: rgba(220, 38, 38, 0.1);
+            border: 1px solid rgba(220, 38, 38, 0.3);
+            color: #ff6b6b;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            display: none;
+        }
+
+        .error-message.active {
+            display: block;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8rem;
+            }
+
+            .selected-movie-content {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .recommendations-grid {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+                gap: 1rem;
+            }
+
+            .search-wrapper {
+                flex-direction: column;
+            }
+
+            .select-wrapper {
+                min-width: 100%;
+            }
+
+            .btn-group {
+                flex-direction: column;
+            }
+
+            button {
+                width: 100%;
+            }
+        }
+
+        footer {
+            text-align: center;
+            padding: 2rem;
+            color: #666;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            margin-top: 3rem;
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div>
+            <div class="logo">CineMatch</div>
+            <div class="nav-subtitle">AI-Powered Movie Recommendations</div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="header">
+            <h1>Discover Your Next Favorite Movie</h1>
+            <p>Get personalized recommendations based on your movie selection</p>
+        </div>
+
+        <div class="error-message" id="errorMessage"></div>
+
+        <div class="search-section">
+            <div class="search-wrapper">
+                <div class="select-wrapper">
+                    <select id="movieSelect">
+                        <option value="">Select a movie...</option>
+                        {% for movie in movies %}
+                        <option value="{{ movie }}">{{ movie }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="btn-group">
+                    <button id="recommendBtn" onclick="getRecommendations()">Get Recommendations</button>
+                    <button class="btn-clear" onclick="clearAll()">Clear</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="selectedMovieSection" style="display: none;">
+            <div class="selected-movie-section">
+                <div class="selected-movie-content">
+                    <div class="movie-poster-container" id="selectedPosterContainer">
+                        <div class="no-poster">No Poster</div>
+                    </div>
+                    <div class="movie-info">
+                        <h2 id="selectedMovieTitle">Select a Movie</h2>
+                        <p id="selectedMovieTags">Loading...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="recommendations-section" id="recommendationsSection" style="display: none;">
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Finding perfect recommendations...</p>
+            </div>
+            <div id="recommendationsContainer">
+                <h2 class="section-title">Recommended For You</h2>
+                <div class="recommendations-grid" id="recommendationsGrid"></div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2024 CineMatch. Powered by AI-driven movie similarity analysis.</p>
+    </footer>
+
+    <script>
+        const movieSelect = document.getElementById('movieSelect');
+        const selectedMovieSection = document.getElementById('selectedMovieSection');
+        const recommendationsSection = document.getElementById('recommendationsSection');
+        const loading = document.getElementById('loading');
+        const errorMessage = document.getElementById('errorMessage');
+
+        movieSelect.addEventListener('change', function() {
+            if (this.value) {
+                showSelectedMovie(this.value);
+            }
+        });
+
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorMessage.classList.add('active');
+            setTimeout(() => {
+                errorMessage.classList.remove('active');
+            }, 5000);
+        }
+
+        function showSelectedMovie(movieName) {
+            selectedMovieSection.style.display = 'block';
+            loading.classList.add('active');
+
+            fetch(`/api/movie/${encodeURIComponent(movieName)}`)
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('selectedMovieTitle').textContent = data.title;
+                    document.getElementById('selectedMovieTags').textContent = data.tags || 'Movie loaded';
+
+                    const posterContainer = document.getElementById('selectedPosterContainer');
+                    posterContainer.innerHTML = '';
+
+                    if (data.poster) {
+                        posterContainer.innerHTML = `<img src="${data.poster}" alt="${data.title}" class="movie-poster">`;
+                    } else {
+                        posterContainer.innerHTML = '<div class="no-poster">No Poster</div>';
+                    }
+
+                    loading.classList.remove('active');
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showError('Failed to load movie details');
+                    loading.classList.remove('active');
+                });
+        }
+
+        function getRecommendations() {
+            const movieName = movieSelect.value;
+
+            if (!movieName) {
+                showError('Please select a movie first');
+                return;
+            }
+
+            recommendationsSection.style.display = 'block';
+            loading.classList.add('active');
+
+            fetch('/api/recommend', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ movie: movieName })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    loading.classList.remove('active');
+
+                    if (data.recommendations) {
+                        displayRecommendations(data.recommendations);
+                    } else if (data.error) {
+                        showError(data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showError('Failed to get recommendations');
+                    loading.classList.remove('active');
+                });
+        }
+
+        function displayRecommendations(recommendations) {
+            const grid = document.getElementById('recommendationsGrid');
+            grid.innerHTML = '';
+
+            recommendations.forEach(movie => {
+                const card = document.createElement('div');
+                card.className = 'movie-card';
+
+                if (movie.poster) {
+                    card.innerHTML = `
+                        <img src="${movie.poster}" alt="${movie.title}">
+                        <div class="movie-card-title">${movie.title}</div>
+                    `;
+                } else {
+                    card.innerHTML = `
+                        <div class="movie-placeholder">No Poster</div>
+                        <div class="movie-card-title">${movie.title}</div>
+                    `;
+                }
+
+                grid.appendChild(card);
+            });
+        }
+
+        function clearAll() {
+            movieSelect.value = '';
+            selectedMovieSection.style.display = 'none';
+            recommendationsSection.style.display = 'none';
+            errorMessage.classList.remove('active');
+        }
+    </script>
+</body>
+</html>
